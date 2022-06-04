@@ -19,6 +19,7 @@ import javafx.util.Duration;
 public class Emulator extends Application {
 
   Timeline gameTimeline;
+  Timeline timerTimeline;
   CPU cpu;
 
   public static void main(String[] args) {
@@ -61,6 +62,9 @@ public class Emulator extends Application {
 
     cpu = new CPU();
 
+    scene.setOnKeyPressed(e -> cpu.keypad.pressKey(e.getCode()));
+    scene.setOnKeyReleased(e -> cpu.keypad.releaseKey(e.getCode()));
+
     gameTimeline = new Timeline();
     gameTimeline.setCycleCount(Timeline.INDEFINITE);
 
@@ -82,11 +86,21 @@ public class Emulator extends Application {
 
     gameTimeline.getKeyFrames().add(gameFrame);
 
+    timerTimeline = new Timeline();
+    timerTimeline.setCycleCount(Timeline.INDEFINITE);
+
+    KeyFrame timerFrame = new KeyFrame(
+        Duration.seconds(1 / 60.0),
+        actionEvent -> cpu.updateTimers());
+
+    timerTimeline.getKeyFrames().add(timerFrame);
+
     stage.show();
   }
 
   private void loadROM(String romPath) {
     gameTimeline.stop();
+    timerTimeline.stop();
 
     cpu = new CPU();
 
@@ -100,6 +114,7 @@ public class Emulator extends Application {
     }
 
     gameTimeline.play();
+    timerTimeline.play();
   }
 
 }
